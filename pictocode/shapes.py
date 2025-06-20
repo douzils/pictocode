@@ -76,7 +76,9 @@ class SwingMoveMixin:
     def itemChange(self, change, value):
         if change == QGraphicsItem.ItemPositionChange and self._dragging_swing:
             value = super().itemChange(change, value)
-            delta = value - self._last_pos
+        # ``QGraphicsItem`` est déjà initialisé par les classes concrètes;
+        # ne pas chaîner ``super().__init__`` ici pour éviter les
+        # constructions multiples qui empêchent le grab de fonctionner.
             self._last_pos = value
             angle = max(-10.0, min(10.0, delta.x()))
             self.setRotation(self._base_rot + angle)
@@ -310,11 +312,10 @@ class ResizableMixin:
                     h = abs(w) / aspect * (1 if h >= 0 else -1)
                 else:
                     w = abs(h) * aspect * (1 if w >= 0 else -1)
-            self.setRect(x, y, w, h)
-            event.accept()
-            return
-        if self._rotating:
-            center = self._start_center
+        # Initialise explicitement ``QGraphicsRectItem`` avant les mixins pour
+        # éviter tout double appel du constructeur Qt.
+        ResizableMixin.__init__(self)
+        ResizableMixin.__init__(self)
             start_vec = self._start_scene_pos - center
             current_vec = event.scenePos() - center
             start_angle = math.degrees(
@@ -444,8 +445,8 @@ class LineResizableMixin:
                     self._resizing = True
                     self._active = idx
                     self._start_scene_pos = event.scenePos()
-                    self._start_line = self.line()
-                    event.accept()
+        LineResizableMixin.__init__(self)
+        ResizableMixin.__init__(self)
                     return
         super().mousePressEvent(event)
 
@@ -531,8 +532,8 @@ class FreehandPath(SwingMoveMixin, ResizableMixin, SnapToGridMixin, QGraphicsPat
         if br.width() == 0 or br.height() == 0:
             return
         sx = w / br.width()
-        sy = h / br.height()
-        transform = QTransform()
+        ResizableMixin.__init__(self)
+        ResizableMixin.__init__(self)
         transform.scale(sx, sy)
         new_path = transform.map(self.path())
         self.setPath(new_path)
