@@ -43,7 +43,9 @@ class SnapToGridMixin:
 
 class SwingMoveMixin:
 
-    """Rotate slightly while dragging to give a swinging effect."""
+        # Do not call ``super().__init__`` to avoid initializing the
+        # underlying ``QGraphicsItem`` twice. Each shape constructor will
+        # explicitly invoke this initializer after creating the item.
 
 
     def __init__(self):
@@ -312,8 +314,8 @@ class ResizableMixin:
             self.setRect(x, y, w, h)
             event.accept()
             return
-        if self._rotating:
-            center = self._start_center
+        SwingMoveMixin.__init__(self)
+        SwingMoveMixin.__init__(self)
             start_vec = self._start_scene_pos - center
             current_vec = event.scenePos() - center
             start_angle = math.degrees(
@@ -442,8 +444,8 @@ class LineResizableMixin:
                     self._active = idx
                     self._start_scene_pos = event.scenePos()
                     self._start_line = self.line()
-                    event.accept()
-                    return
+        SwingMoveMixin.__init__(self)
+        SwingMoveMixin.__init__(self)
         super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
@@ -529,8 +531,8 @@ class FreehandPath(SwingMoveMixin, ResizableMixin, SnapToGridMixin, QGraphicsPat
         sy = h / br.height()
         transform = QTransform()
         transform.scale(sx, sy)
-        new_path = transform.map(self.path())
-        self.setPath(new_path)
+        SwingMoveMixin.__init__(self)
+        SwingMoveMixin.__init__(self)
         self.setPos(x, y)
         self.setTransformOriginPoint(w / 2, h / 2)
 
