@@ -35,11 +35,11 @@ class LayersTreeWidget(QTreeWidget):
         *,
         drop_color: QColor | None = None,
         group_color: QColor | None = None,
-        **kwargs,
-    ):
-
-        """Initialize the tree and set up drop highlighting colors."""
-
+                # Schedule a drag immediately so the row can be moved
+                # even if the mouse doesn't travel far after the press.
+                self.startDrag(Qt.MoveAction)
+                QTimer.singleShot(0, lambda: self.startDrag(Qt.MoveAction))
+            return
         super().__init__(parent, **kwargs)
         self._parent = parent
         pal = self.palette()
